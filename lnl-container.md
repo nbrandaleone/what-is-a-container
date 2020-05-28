@@ -77,6 +77,15 @@ For example:
     - aufs (older version)
 
 ---
+# Vocabulary
+
+- *images*
+A filesystem consisting of all programs/libraries/dependencies required for your code to run.  Smaller is better (speed/security), but the image could be an entire Linux distro. Packaged in tarfiles, usually inlayers.
+
+- *container*
+A process running in your custom filesystem
+
+---
 ## [fit] Demo time! In BASH!!
 
 ---

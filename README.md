@@ -1,6 +1,9 @@
-# What is a container lab
+# What is a container? - lab
 
 pull down code and presentation.
+```bash
+git clone https://github.com/nbrandaleone/what-is-a-container.git
+```
 
 ```bash
 $ git clone ...
