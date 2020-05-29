@@ -28,7 +28,12 @@ ignite run weaveworks/ignite-ubuntu \
 ```
 
 Login: root/root
-Examine the kernel version
+# Inside the VM you can check that the kernel version is different, and the IP address came from the container
+# Also the memory is limited to what you specify, as well as the vCPUs
+> uname -a
+> ip addr
+> free -m
+> cat /proc/cpuinfo
 
 ## Stop and Delete the VM
 Ignite VMs can be stopped three ways:
