@@ -145,3 +145,14 @@ Namespaces will clean themselves up if there are no more processes in them.
 ```bash
 # cgdelete memory,pids:demo
 ```
+
+# Future:
+## Look at an OCI container
+
+What yum repo for AL1 ?
+```bash
+sudo yum install skopeo -y
+skopeo copy docker://busybox:latest oci:busybox:latest
+runc rootfs
+```
+

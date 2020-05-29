@@ -79,8 +79,10 @@ For example:
 ---
 # Vocabulary
 
+## Container = A standardized unit of software
+
 - *images*
-A filesystem consisting of all programs/libraries/dependencies required for your code to run.  Smaller is better (speed/security), but the image could be an entire Linux distro. Packaged in tarfiles, usually inlayers.
+A filesystem consisting of all code/libraries/dependencies required for your code to run.  Smaller is better (speed/security), but the image could be an entire Linux distro. Packaged in tarfiles, usually in layers. Stored in repos like DockerHub or ECR.
 
 - *container*
 A process running in your custom filesystem
