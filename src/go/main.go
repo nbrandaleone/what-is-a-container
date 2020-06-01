@@ -39,6 +39,11 @@ func child() {
 	must(syscall.PivotRoot("rootfs", "rootfs/oldrootfs"))
 	must(os.Chdir("/"))
 
+//  Syscall Chroot can be executed instead of PivotRoot for same effect
+//  must(syscall.Chroot("/var/lib/lxc/container/rootfs"))
+//	must(os.Chdir("/"))
+//	must(syscall.Mount("proc", "proc", "proc", 0, ""))
+
 	cmd := exec.Command(os.Args[2], os.Args[3:]...)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
