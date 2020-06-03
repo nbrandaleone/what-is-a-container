@@ -42,7 +42,7 @@ Firecracker demo | 5 minutes |
 ## Containers do not *really* exist
 
 - Namespaces
-- cgroups + Linux capabilities
+- cgroups (Linux capabilities + Seccomp)
 - COW or layered filesystem
 
 **Linux** Kernel tricks - Windows should use .Net Core
@@ -50,6 +50,7 @@ Firecracker demo | 5 minutes |
 ---
 # Namespaces
 
+*CGROUP* - limit cpu/memory for a group of processes.
 *MNT*: It allows a process to have its own filesystem. 
 *PID*: The pid namespace gives a process its own view of /proc.
 *NET*: Isolated network stack. 
