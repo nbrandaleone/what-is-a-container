@@ -14,7 +14,7 @@ AWS Specialist SA - Containers
 - Ask questions
 - Try to be on _mute_ when not asking questions
 - I will be moving quickly
-- The content is on Github.  You can go at your own pace
+- https://github.com/nbrandaleone/what-is-a-container
 - I will be using Cloud-9 for a demo
 
 --- 
@@ -86,11 +86,18 @@ For example:
     - runc (low level)
 
 ---
+# How they fit together
+
+![inline](images/docker.png)
+
+---
 # Under the hood
 
 No `fork() and exec()`
 
 We now `clone() or unshare()`
+
+### Docker and Kubernetes are written in *Go*, not *C*
 
 ---
 # [fit] Demo time! 
@@ -103,11 +110,15 @@ We now `clone() or unshare()`
 ---
 # Resources:
 
+- https://www.infoq.com/articles/build-a-container-golang/
+- https://gist.github.com/christophberger/58505418133d474486a88f958d8ea14b
+- https://www.nickaws.net/linux/2020/03/05/Containers-are-not-magic.html
+
 ---
 # Videos:
 
--
--
--
+- https://www.youtube.com/watch?time_continue=2&v=sK5i-N34im8
+- https://www.youtube.com/watch?v=Utf-A4rODH8
+- https://containersummit.io/events/nyc-2016/videos/building-containers-in-pure-bash-and-c
 
 ---
