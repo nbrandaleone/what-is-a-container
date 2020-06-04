@@ -5,19 +5,14 @@ pull down code and presentation.
 git clone https://github.com/nbrandaleone/what-is-a-container.git
 ```
 
-```bash
-$ git clone ...
-```
-
 # Demo - using BASH
-I assume that one is using a Cloud-9 instance.
 
 ## 1. Let's create a filesystem to be used by our "container"
 I will provide a filesystem based upon frapsoft/fish Fish Docker container, which has been flattened into a single tarball.
 
 ``` bash
 $ wget bit.ly/fish-container -O fish.tar
-$ mkdir container-root; cd container-root
+$ mkdir rootfs; cd rootfs
 $ tar -xf ../fish.tar
 ```
 
@@ -25,7 +20,20 @@ Poke around in your new filesystem.  It is based upon busybox, so it is not very
 
 I like to create a "YOU-ARE-HERE" file to mark this fs.
 
-## 3. Let's use `chroot` to move us into the filesystem
+## Show how `lsns` works
+
+``` bash
+# have 2 terminals open
+# in terminal 1
+$ sleep 500 &
+
+# grab PID
+# In terminal 2
+$ sudo lsns
+$ sudo lsns -p <PID>
+```
+
+## Let's use `chroot` to move us into the filesystem
 
 ``` bash
 # have two terminals open
@@ -52,11 +60,9 @@ So much for containment.
 
 ## 2. Create a new NS, "unsharing" UTS
 ``` bash
-sudo unshare --uts /bin/sh -c '/usr/bin/fish'
+sudo unshare --uts /bin/sh
 # change hostname. Verify it has changed
 ```
-
-Notice that /proc/[pid]/ns, has links to unique ids.
 
 ``` bash
 sudo unshare --pid --fork --mount-proc chroot "$PWD" \
@@ -69,73 +75,99 @@ The kernel exposes cgroups through the /sys/fs/cgroup directory.
 However, in Cloud-9 which leverages Amazon Linux 1, the cgroup location is: /cgroup.
 Also, cgroups are not enabled by default in AL1.
 
-# Only required in AL1
-```bash
-# mount
-...
+## Install cgroup-tools
+
+``` bash
+sudo apt install cgroup-tools
 ```
 
 ### Set cgroup limits
 ``` bash
 cgroup_id="cgroup_$(shuf -i 1000-2000 -n 1)"
-cgcreate -g "cpu,cpuacct,memory,pids:$cgroup_id"
-cgset -r cpu.shares=128 "$cgroup_id"
-cgset -r memory.limit_in_bytes="100M" "$cgroup_id"
-cgset -r pids.max "$cgroup_id"
+sudo cgcreate -g "cpu,cpuacct,memory,pids:$cgroup_id"
+sudo cgset -r cpu.shares=128 "$cgroup_id"
+sudo cgset -r memory.limit_in_bytes="100M" "$cgroup_id"
+sudo cgset -r memory.swappiness=0 ${cgroup_id}
+sudo cgset -r pids.max=10 "$cgroup_id"
+
+echo ${$cgroup_id}
+cd /sys/fs/cgroup/memory/${cgroup_id}
 ```
 
-```bash
-# yum -y install libcgroup
-# mkdir -p /cgroup/memory/demo
+Examine limits
 
-# echo "100M" > /cgroup/memory/demo/memory.limit_in_bytes
-# echo "0" > /cgroup/memory/demo/memory.swappiness
+# Another way of setting cgroup limits...
+# echo "100M" > /sys/fs/cgroup/demo/memory.limit_in_bytes
+# echo "0" > /sys/fs/cgroup/demo/memory.swappiness
 ```
 
 ## Let's create a memory eating program
 ```bash
-# yum install glibc-static -y
-$ gcc -static munch.c
-$ mv a.out rootfs/
+# For AL1. yum install glibc-static -y
+cd ~/environment/what-is-a-container/src/c
+gcc -static -o munch munch.c
+mv munch ~/environment/rootfsmunch
 ```
 
 Now - let's create our container with the `cgroups`.
 
 ```bash
-cgexec -g "memory:demo" \
+sudo cgexec -g "memory:${cgroup_id}" \
     unshare -fmuipn --mount-proc \
     chroot "$PWD" \
     /bin/sh -c "/bin/mount -t proc proc /proc && hostname container-fun-times && /usr/bin/fish"
 ```
 
-## Let's stop a fork bomb!
-
-### put the cgroup into place
+Inside of the *container*, run `munch`
 ``` bash
-# mkdir -p /cgroup/pids
-# mount -t cgroup -o pids none /cgroup/pids
-# echo 10 > /cgroup/pids/demo/pids.max
+# Inside container
+$ ./munch
 ```
 
-### create the bomb
+## Let's stop a fork bomb!
+
 ```bash
+$ cd what-is-a-container/src/c
 $ gcc -static fork-bomb.c -o fb
-$ mv fb rootfs/
+$ cp fb ~/environment/rootfs/
 ```
 
 # Create our new container
 ``` bash
-$ sudo cgexec -g "pids,memory:demo" unshare -fmuipn --mount-proc \
+sudo cgexec -g "pids,memory:${cgroup_id}" unshare -fmuipn --mount-proc \
 chroot "$PWD" /bin/sh -c "/bin/mount -t proc proc /proc && \
 hostname container-fun-times && /usr/bin/fish"
 ```
 
 ### From host terminal
 ```bash
-$ ps aux | grep forkbomb | wc -l
+$ ps aux | grep fb | wc -l
 ```
 
-The output should be 98.  Ctr-C the program.
+The output should be 8.  Ctr-C the program.
+
+## Now, let's see if we can turn our mini-filesystem
+   into an OCI-compatible container
+
+``` bash
+# In directory, one above rootfs
+runc spec
+sudo runc run test
+
+# From other terminal
+sudo runc list
+sudo runc state test
+sudo runc ps test
+sudo runc kill test KILL
+```
+ 
+Look around from other terminal session
+``` basg=h
+ps axfo pid,ppid,command | grep runc
+pstree <pid>
+```
+
+Notice that /proc/[pid]/ns, has links to unique ids.
 
 # Move to firecrack demo if there is time.
 
@@ -143,13 +175,10 @@ Clean up the CPU/memory cgroups.
 Namespaces will clean themselves up if there are no more processes in them.
 
 ```bash
-# cgdelete memory,pids:demo
+sudo cgdelete "memory,pids:${cgroup_id}"
 ```
 
-# Future:
-## Look at an OCI container
-
-What yum repo for AL1 ?
+# Future
 ```bash
 sudo yum install skopeo -y
 skopeo copy docker://busybox:latest oci:busybox:latest

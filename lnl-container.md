@@ -15,7 +15,7 @@ AWS Specialist SA - Containers
 - Try to be on _mute_ when not asking questions
 - I will be moving quickly
 - https://github.com/nbrandaleone/what-is-a-container
-- I will be using Cloud-9 for a demo
+- I will be using Cloud-9 (Ubuntu OS)  for a demo
 
 --- 
 ## Agenda
