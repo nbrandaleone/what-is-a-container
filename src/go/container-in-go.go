@@ -44,7 +44,8 @@ func parent() {
 
   // Create namespaces with clone()
   // Utilize User ns function to map UID/GID to non-root.
-  // Allows for non-root to execute run program
+  // Allows for non-root to execute run program.
+  // Unfortunately, due to cgroups, we still need to run program as root.
 	cmd.SysProcAttr = &syscall.SysProcAttr{
 		Cloneflags:   syscall.CLONE_NEWUTS | syscall.CLONE_NEWPID | syscall.CLONE_NEWNS,
 		Unshareflags: syscall.CLONE_NEWNS,
