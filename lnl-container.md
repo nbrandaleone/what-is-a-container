@@ -55,7 +55,7 @@ Firecracker demo | 5 minutes |
 *PID*: The pid namespace gives a process its own view of /proc.
 *NET*: Isolated network stack. 
 *UTS*: System’s hostname and domain name. 
-*USER*: The user namespace maps the uids a process sees to a different set of uids. 
+*USER*: The user namespace maps the uids to different uids. 
 *IPC*: message queues and shared memory.
 
 ---
