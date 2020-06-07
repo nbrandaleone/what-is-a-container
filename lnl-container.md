@@ -123,3 +123,10 @@ We now `clone() or unshare()`
 - https://containersummit.io/events/nyc-2016/videos/building-containers-in-pure-bash-and-c
 
 ---
+# Workshops
+
+- http://redhatgov.io/workshops/containers_the_hard_way/
+- https://ericchiang.github.io/post/containers-from-scratch/
+- https://github.com/riyazdf/dockercon-workshop
+
+---

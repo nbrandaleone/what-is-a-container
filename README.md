@@ -10,7 +10,8 @@
 > and it shares the host’s kernel. 
 > -- Liz Rice
 
-pull down code and presentation.
+Pull down code and presentation. I assume that you are running this on a modern Linux host. I am using AWS `Cloud-9` with Ubuntu.
+
 ```bash
 git clone https://github.com/nbrandaleone/what-is-a-container.git
 ```
@@ -30,6 +31,11 @@ Poke around in your new filesystem.  It is based upon busybox, so it is not very
 
 I like to create a "YOU-ARE-HERE" file to mark this fs.
 
+``` bash
+# While in the new rootfs
+$ touch YOU-ARE-HERE
+```
+
 ## Show how `lsns` works
 
 ``` bash
@@ -41,6 +47,13 @@ $ sleep 500 &
 # In terminal 2
 $ sudo lsns
 $ sudo lsns -p <PID>
+```
+
+## It is also possible to examine the `proc` filesystem directly
+
+``` bash
+$ ls -l /proc/self/ns
+$ readlink /proc/$$/ns
 ```
 
 ## Let's use `chroot` to move us into the filesystem
@@ -82,8 +95,6 @@ hostname containers-fun-times && /usr/bin/fish"
 
 # Let's investigate cgroups
 The kernel exposes cgroups through the /sys/fs/cgroup directory.
-However, in Cloud-9 which leverages Amazon Linux 1, the cgroup location is: /cgroup.
-Also, cgroups are not enabled by default in AL1.
 
 ## Install cgroup-tools
 
@@ -106,8 +117,9 @@ cd /sys/fs/cgroup/memory/${cgroup_id}
 
 Examine limits
 
-# Another way of setting cgroup limits...
-# echo "100M" > /sys/fs/cgroup/demo/memory.limit_in_bytes
+Another way of setting cgroup limits...
+``` bash
+# echo "100M" > /sys/fs/cgroup/demo/memory/limit_in_bytes
 # echo "0" > /sys/fs/cgroup/demo/memory.swappiness
 ```
 
@@ -156,8 +168,7 @@ $ ps aux | grep fb | wc -l
 
 The output should be 8.  Ctr-C the program.
 
-## Now, let's see if we can turn our mini-filesystem
-   into an OCI-compatible container
+## Now, let's see if we can turn our mini-filesystem into an OCI-compatible container
 
 ``` bash
 # In directory, one above rootfs
@@ -176,8 +187,6 @@ Look around from other terminal session
 ps axfo pid,ppid,command | grep runc
 pstree <pid>
 ```
-
-Notice that /proc/[pid]/ns, has links to unique ids.
 
 # Move to firecrack demo if there is time.
 
