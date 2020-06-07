@@ -30,7 +30,7 @@ func main() {
 	case "child":
 		child()
 	default:
-		panic("Arguments should be either run [commands...]")
+		panic("Arguments should be run <command> <params>")
 	}
 }
 
@@ -43,19 +43,20 @@ func parent() {
 	cmd.Stderr = os.Stderr
 
   // Create namespaces with clone()
-  // Utilize User ns function to map UID/GID to non-root.
-  // Allows for non-root to execute run program.
+  // Utilize NEWUSER flag to map UID/GID to non-root.
+  // Allows for non-root to execute main program.
   // Unfortunately, due to cgroups, we still need to run program as root.
 	cmd.SysProcAttr = &syscall.SysProcAttr{
-		Cloneflags:   syscall.CLONE_NEWUTS | syscall.CLONE_NEWPID | syscall.CLONE_NEWNS,
+		Cloneflags:   syscall.CLONE_NEWUTS | syscall.CLONE_NEWPID | syscall.CLONE_NEWNS | syscall.CLONE_NEWUSER,
 		Unshareflags: syscall.CLONE_NEWNS,
-    Credential: &syscall.Credential{Uid: 0, Gid: 0},
+    Credential: &syscall.Credential{Uid: 0, Gid: 0,}, // NoSetGroups: true,},
     UidMappings: []syscall.SysProcIDMap{
       {ContainerID: 0, HostID: os.Getuid(), Size: 1},
     },
     GidMappings: []syscall.SysProcIDMap{
       {ContainerID: 0, HostID: os.Getgid(), Size: 1},
     },
+    GidMappingsEnableSetgroups: false,
 	}
 
 	must(cmd.Run())
@@ -67,7 +68,7 @@ func child() {
 	cg()
 
 	must(syscall.Sethostname([]byte("container")))
-	must(syscall.Chroot("/home/ubuntu/environment/rootfs"))
+	must(syscall.Chroot("/home/ubuntu/rootfs"))
 	must(syscall.Chdir("/"))
 	must(syscall.Mount("proc", "proc", "proc", 0, ""))
 
