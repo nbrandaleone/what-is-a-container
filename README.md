@@ -1,5 +1,15 @@
 # What is a container? - lab
 
+> Although they are called containers, it might be more accurate 
+> to use the term “containerized processes”. A container is still a 
+> Linux process, running on the host machine - it just has a limited 
+> view of that host machine, and it only has access to a subtree 
+> of the file system and perhaps to a limited set of resources 
+> restricted by cgroups. Because it’s really just a process, 
+> it exists within the context of the host operating system, 
+> and it shares the host’s kernel. 
+> -- Liz Rice
+
 pull down code and presentation.
 ```bash
 git clone https://github.com/nbrandaleone/what-is-a-container.git
