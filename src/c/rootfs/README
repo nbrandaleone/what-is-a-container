@@ -1,0 +1,10 @@
+This is a busybox image.
+Type `hostname`.
+Type `ps`.
+Type `mount`.
+
+The previous 3 commands show the Namespaces created for this
+child process.
+    1. CLONE_NEWNS
+    2. CLONE_NEWPID
+    3. CLONE_NEWUTS
