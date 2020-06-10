@@ -50,8 +50,56 @@ By issuing the reboot command inside the VM
 ### Removing other resources
 To remove an image, run:
 
+``` bash
 # ignite rmi weaveworks/ignite-ubuntu
+```
+
 And to remove a kernel, run:
 
+```
 # ignite rmk weaveworks/ignite-kernel:4.19.47
+```
 
+# 4000 Firecarcker VM demo
+## https://github.com/firecracker-microvm/firecracker-demo
+
+Git clone `firecracker-demo` onto host (alread done).
+Go into proper directory, and become root.
+``` shell
+cd firecracker-demo
+```
+
+Have 2 terminals open.  In terminal 1:
+``` bash
+python3 microvm-tiles.py
+```
+
+In terminal 2:
+``` bash
+./parallel-start-many.sh 0 4000 6
+```
+
+Each microVM has a workload (iperf client) and will run it in a loop with a random sleep between iterations.
+
+Looking at the heatmap you should see six 'snakes' advancing which are the microVMs that have just been powered up and are doing their first iteration of the workload. Once that's done, the random sleep will lead to random lighting of the heatmap.
+
+## Verify 4000 VM
+``` bash
+ps | grep firecracker | wc -l
+```
+
+Results:
+``` bash
+# ./parallel-start-many.sh 0 4000 6
+Start @ Wed Jun 10 16:54:25 UTC 2020.
+Done @ Wed Jun 10 16:55:43 UTC 2020.
+Started 4000 microVMs in 77926 milliseconds.
+MicroVM mutation rate was 51.94805194805194805194 microVMs per second.
+```
+
+That is about 1 VM starting every 20 ms.
+
+## Clean up
+``` bash
+killall firecracker
+```

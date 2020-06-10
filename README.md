@@ -188,19 +188,13 @@ ps axfo pid,ppid,command | grep runc
 pstree <pid>
 ```
 
-# Move to firecrack demo if there is time.
 
-Clean up the CPU/memory cgroups.
+## Clean up the CPU/memory cgroups.
 Namespaces will clean themselves up if there are no more processes in them.
 
 ```bash
 sudo cgdelete "memory,pids:${cgroup_id}"
 ```
 
-# Future
-```bash
-sudo yum install skopeo -y
-skopeo copy docker://busybox:latest oci:busybox:latest
-runc rootfs
-```
-
+# Move to firecrack demo if there is time.
+There is a separate `ignite` directory, and README file.
