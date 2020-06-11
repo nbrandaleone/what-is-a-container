@@ -1,8 +1,17 @@
 // Nick Brandaleone - June 2020
 // Container from scratch, in Rust.
+// This program is somwhat buggy and incomplete. However, it does show the basics of creating a "container".
 //
 // Shamelessly stolen from:
 // https://github.com/gs0510/containerust
+//
+// Prepare your rust environment:
+//
+// $ curl https://sh.rustup.rs -sSf | sh
+// $ cd rust/container_rust
+// $ cargo build
+// Move binary to be above  the rootfs directory.
+// $ sudo ./container_rust ps -aux
 
 use nix::sched::{setns, CloneFlags};
 use nix::unistd::{chroot, sethostname};
@@ -11,7 +20,7 @@ use std::fs::{self, DirBuilder};
 use std::os::unix::fs::DirBuilderExt;
 use std::path::{Path, PathBuf};
 use std::{process, process::Command};
-use std::{thread, time};
+//use std::{thread, time};
 
 type Result<T> = std::result::Result<T, Box<std::error::Error>>;
 
@@ -28,7 +37,7 @@ fn run(string: &str, string1: &str) {
     setns(-1, CloneFlags::CLONE_NEWPID);
 
     // let mut cf = CloneFlags::empty();
-    //sethostname("gargi")?;
+    //sethostname("container-fun-times")?;
 }
 
 // fn run1() {
@@ -63,8 +72,8 @@ fn cgroups() {
 fn child(string: &str) -> Result<()> {
     cgroups();
 
-    sethostname("gawwrgi")?;
-    let root_dir = Path::new("bind_new_root");
+    sethostname("container-fun-times")?;
+    let root_dir = Path::new("rootfs");
     //cleanup_root_dir(root_dir)?;
     // setup_root_dir(root_dir)?;
     do_things(root_dir)?;
@@ -104,13 +113,10 @@ fn do_things(root_dir: &Path) -> Result<()> {
     for (key, value) in env::vars() {
         eprintln!("{}: {}", key, value);
     }
-    Command::new("which")
-        .arg("ls")
+    Command::new("/bin/ls")
+        .arg("-alh")
         .spawn()
-        .expect("which failed");
-    Command::new("ls")
-        .spawn()
-        .expect("ls command failed to start");
+        .expect("/bin/ls failed to start");
     Ok(())
 }
 
@@ -138,7 +144,7 @@ fn main() -> Result<()> {
     let argv: Vec<_> = env::args().collect();
     println!("{}", argv[1]);
     if argv[1] == "run" {
-        run(&argv[2], &argv[3]);
+       run(&argv[2], &argv[3]);
     } else if argv[1] == "child" {
         child(&argv[2])?;
     } else {

@@ -177,7 +177,7 @@ gcc -static fork-bomb.c -o fb
 cp fb ~/environment/rootfs/
 ```
 
-# From inside our container
+### From inside our container
 ``` bash
 ./fb
 ```
