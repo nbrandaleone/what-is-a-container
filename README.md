@@ -18,7 +18,7 @@ git clone https://github.com/nbrandaleone/what-is-a-container.git
 
 # Demo - using BASH
 
-## 1. Let's create a filesystem to be used by our "container"
+## Let's create a filesystem to be used by our "container"
 I will provide a filesystem based upon frapsoft/fish Fish Docker container, which has been flattened into a single tarball.
 
 ``` bash
@@ -39,7 +39,7 @@ $ touch YOU-ARE-HERE
 ## Show how `lsns` works
 
 ``` bash
-# have 2 terminals open
+# Have 2 terminals open.
 # in terminal 1
 $ sleep 500 &
 
@@ -49,18 +49,18 @@ $ sudo lsns
 $ sudo lsns -p <PID>
 ```
 
-## It is also possible to examine the `proc` filesystem directly
+## Examine the `proc` filesystem directly, for information on namespaces and process attributes.
 
+The `proc` filesystem is virtual, in that it does not exist on disk - only in memory.
 ``` bash
 $ ls -l /proc/self/ns
-$ readlink /proc/$$/ns
+$ readlink /proc/$$/ns/pid
 ```
 
 ## Let's use `chroot` to move us into the filesystem
 
 ``` bash
-# have two terminals open
-# in terminal 1, outside of chroot
+# In terminal 1, outside of chroot
 $ top
 ```
 
@@ -81,17 +81,39 @@ So much for containment.
 
 # This why namespaces are important
 
-## 2. Create a new NS, "unsharing" UTS
+## Create a new NS, "unsharing" UTS
 ``` bash
 sudo unshare --uts /bin/sh
 # change hostname. Verify it has changed
 ```
 
+Now, let's `unshare` the **pid** namespace and `chroot` into our new filesystem. Finally, change the hostname and run the *fish* shell. 
 ``` bash
 sudo unshare --pid --fork --mount-proc chroot "$PWD" \
 /bin/sh -c "/bin/mount -t proc none /proc && \
 hostname containers-fun-times && /usr/bin/fish"
 ```
+
+## Joining processes into a combined namespace
+A powerful aspect of namespaces is their composability; processes may choose to separate some namespaces but share others. For instance it may be useful for two programs to have isolated PID namespaces, but share a network namespace (e.g. Kubernetes pods). This brings us to the setns syscall and the nsentercommand line tool.
+
+Let's find the shell running in a chroot from our last example.
+
+``` bash
+# From the host, not the chroot.
+ps aux | grep /bin/sh | grep root
+...
+root <PID>
+```
+Grab the PID of the running shell (inside the container). For example, say it is 28840.
+
+``` bash
+sudo nsenter --pid=/proc/29840/ns/pid \
+    unshare -f --mount-proc=$PWD/rootfs/proc \
+    chroot rootfs /bin/sh
+```
+
+Having entered the namespace successfully, when we run ps in the second shell (PID 5) we see the first shell (PID 1).
 
 # Let's investigate cgroups
 The kernel exposes cgroups through the /sys/fs/cgroup directory.
@@ -111,7 +133,7 @@ sudo cgset -r memory.limit_in_bytes="100M" "$cgroup_id"
 sudo cgset -r memory.swappiness=0 ${cgroup_id}
 sudo cgset -r pids.max=10 "$cgroup_id"
 
-echo ${$cgroup_id}
+echo ${cgroup_id}
 cd /sys/fs/cgroup/memory/${cgroup_id}
 ```
 
@@ -128,13 +150,14 @@ Another way of setting cgroup limits...
 # For AL1. yum install glibc-static -y
 cd ~/environment/what-is-a-container/src/c
 gcc -static -o munch munch.c
-mv munch ~/environment/rootfsmunch
+cp munch ~/environment/rootfs/munch
 ```
 
 Now - let's create our container with the `cgroups`.
+You may have to `export cgroup_id=<NAME>` from one terminal to the other.
 
 ```bash
-sudo cgexec -g "memory:${cgroup_id}" \
+sudo cgexec -g "memory,pids:${cgroup_id}" \
     unshare -fmuipn --mount-proc \
     chroot "$PWD" \
     /bin/sh -c "/bin/mount -t proc proc /proc && hostname container-fun-times && /usr/bin/fish"
@@ -143,27 +166,25 @@ sudo cgexec -g "memory:${cgroup_id}" \
 Inside of the *container*, run `munch`
 ``` bash
 # Inside container
-$ ./munch
+./munch
 ```
 
 ## Let's stop a fork bomb!
 
 ```bash
-$ cd what-is-a-container/src/c
-$ gcc -static fork-bomb.c -o fb
-$ cp fb ~/environment/rootfs/
+cd ~/environment/what-is-a-container/src/c
+gcc -static fork-bomb.c -o fb
+cp fb ~/environment/rootfs/
 ```
 
-# Create our new container
+# From inside our container
 ``` bash
-sudo cgexec -g "pids,memory:${cgroup_id}" unshare -fmuipn --mount-proc \
-chroot "$PWD" /bin/sh -c "/bin/mount -t proc proc /proc && \
-hostname container-fun-times && /usr/bin/fish"
+./fb
 ```
 
 ### From host terminal
 ```bash
-$ ps aux | grep fb | wc -l
+ps aux | grep fb | wc -l
 ```
 
 The output should be 8.  Ctr-C the program.
