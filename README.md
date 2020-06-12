@@ -8,6 +8,7 @@
 > restricted by cgroups. Because it’s really just a process, 
 > it exists within the context of the host operating system, 
 > and it shares the host’s kernel. 
+>
 > -- Liz Rice
 
 Pull down code and presentation. I assume that you are running this on a modern Linux host. I am using AWS `Cloud-9` with Ubuntu.
