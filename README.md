@@ -23,9 +23,9 @@ git clone https://github.com/nbrandaleone/what-is-a-container.git
 I will provide a filesystem based upon frapsoft/fish Fish Docker container, which has been flattened into a single tarball.
 
 ``` bash
-$ wget bit.ly/fish-container -O fish.tar
-$ mkdir rootfs; cd rootfs
-$ tar -xf ../fish.tar
+wget bit.ly/fish-container -O fish.tar
+mkdir rootfs; cd rootfs
+tar -xf ../fish.tar
 ```
 
 Poke around in your new filesystem.  It is based upon busybox, so it is not very large.
@@ -34,7 +34,7 @@ I like to create a "YOU-ARE-HERE" file to mark this fs.
 
 ``` bash
 # While in the new rootfs
-$ touch YOU-ARE-HERE
+touch YOU-ARE-HERE
 ```
 
 ## Show how `lsns` works
@@ -42,32 +42,32 @@ $ touch YOU-ARE-HERE
 ``` bash
 # Have 2 terminals open.
 # in terminal 1
-$ sleep 500 &
+sleep 500 &
 
 # grab PID
 # In terminal 2
-$ sudo lsns
-$ sudo lsns -p <PID>
+sudo lsns
+sudo lsns -p <PID>
 ```
 
 ## Examine the `proc` filesystem directly, for information on namespaces and process attributes.
 
 The `proc` filesystem is virtual, in that it does not exist on disk - only in memory.
 ``` bash
-$ ls -l /proc/self/ns
-$ readlink /proc/$$/ns/pid
+ls -l /proc/self/ns
+readlink /proc/$$/ns/pid
 ```
 
 ## Let's use `chroot` to move us into the filesystem
 
 ``` bash
 # In terminal 1, outside of chroot
-$ top
+top
 ```
 
 We can see the `top` from the other terminal
 ``` bash
-$ sudo chroot rootfs /bin/sh
+sudo chroot rootfs /bin/sh
 # mount -t proc proc /proc
 # ps aux | grep top
 ```
